@@ -1,7 +1,7 @@
 """YOLO format reader and writer."""
 
 from pathlib import Path
-from typing import Union, Optional
+from typing import Union
 
 from ..models import Dataset, Image, Annotation, Category, BBox
 
@@ -14,7 +14,7 @@ class YOLOReader:
         labels_dir: Union[str, Path],
         images_dir: Union[str, Path],
         classes_file: Union[str, Path],
-        image_ext: str = ".jpg"
+        image_ext: str = ".jpg",
     ) -> Dataset:
         """
         Read YOLO format annotations.
@@ -40,7 +40,7 @@ class YOLOReader:
         dataset = Dataset()
 
         # Read classes
-        with open(classes_file, 'r') as f:
+        with open(classes_file, "r") as f:
             class_names = [line.strip() for line in f if line.strip()]
 
         for idx, name in enumerate(class_names):
@@ -55,7 +55,7 @@ class YOLOReader:
 
             if not image_path.exists():
                 # Try other common extensions
-                for ext in ['.jpg', '.jpeg', '.png', '.JPG', '.JPEG', '.PNG']:
+                for ext in [".jpg", ".jpeg", ".png", ".JPG", ".JPEG", ".PNG"]:
                     test_path = images_dir / (label_file.stem + ext)
                     if test_path.exists():
                         image_path = test_path
@@ -69,21 +69,20 @@ class YOLOReader:
             # As a workaround, we'll try to get it from a companion metadata or use PIL
             try:
                 from PIL import Image as PILImage
+
                 with PILImage.open(image_path) as img:
                     width, height = img.size
             except ImportError:
                 # If PIL not available, skip or use default
-                print(f"Warning: PIL not available. Cannot determine image size for {image_name}")
+                print(
+                    f"Warning: PIL not available. Cannot determine image size for {image_name}"
+                )
                 continue
 
-            image = Image(
-                file_name=image_name,
-                width=width,
-                height=height
-            )
+            image = Image(file_name=image_name, width=width, height=height)
 
             # Read annotations
-            with open(label_file, 'r') as f:
+            with open(label_file, "r") as f:
                 for line in f:
                     line = line.strip()
                     if not line:
@@ -102,7 +101,9 @@ class YOLOReader:
                     annotation = Annotation(
                         bbox=bbox,
                         category_id=class_id,
-                        category_name=class_names[class_id] if class_id < len(class_names) else 'unknown'
+                        category_name=class_names[class_id]
+                        if class_id < len(class_names)
+                        else "unknown",
                     )
                     image.add_annotation(annotation)
 
@@ -118,7 +119,7 @@ class YOLOWriter:
     def write(
         dataset: Dataset,
         output_labels_dir: Union[str, Path],
-        output_classes_file: Union[str, Path]
+        output_classes_file: Union[str, Path],
     ) -> None:
         """
         Write dataset to YOLO format.
@@ -136,7 +137,7 @@ class YOLOWriter:
 
         # Write classes file
         sorted_categories = sorted(dataset.categories, key=lambda c: c.id)
-        with open(output_classes_file, 'w') as f:
+        with open(output_classes_file, "w") as f:
             for category in sorted_categories:
                 f.write(f"{category.name}\n")
 
@@ -146,7 +147,7 @@ class YOLOWriter:
             label_name = Path(image.file_name).stem + ".txt"
             label_path = output_labels_dir / label_name
 
-            with open(label_path, 'w') as f:
+            with open(label_path, "w") as f:
                 for annotation in image.annotations:
                     # Convert bbox to YOLO format
                     x_center, y_center, width, height = annotation.bbox.to_yolo(
@@ -154,5 +155,7 @@ class YOLOWriter:
                     )
 
                     # Write: class_id x_center y_center width height
-                    f.write(f"{annotation.category_id} {x_center:.6f} {y_center:.6f} "
-                           f"{width:.6f} {height:.6f}\n")
+                    f.write(
+                        f"{annotation.category_id} {x_center:.6f} {y_center:.6f} "
+                        f"{width:.6f} {height:.6f}\n"
+                    )

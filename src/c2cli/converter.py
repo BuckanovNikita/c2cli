@@ -5,9 +5,12 @@ from typing import Union, Literal
 
 from .models import Dataset
 from .formats import (
-    COCOReader, COCOWriter,
-    YOLOReader, YOLOWriter,
-    PascalVOCReader, PascalVOCWriter
+    COCOReader,
+    COCOWriter,
+    YOLOReader,
+    YOLOWriter,
+    PascalVOCReader,
+    PascalVOCWriter,
 )
 
 FormatType = Literal["coco", "yolo", "voc"]
@@ -34,7 +37,7 @@ class Converter:
         target_format: FormatType,
         source_path: Union[str, Path],
         target_path: Union[str, Path],
-        **kwargs
+        **kwargs,
     ) -> Dataset:
         """
         Convert annotations from one format to another.
@@ -83,10 +86,7 @@ class Converter:
         return dataset
 
     def read(
-        self,
-        format_type: FormatType,
-        source_path: Union[str, Path],
-        **kwargs
+        self, format_type: FormatType, source_path: Union[str, Path], **kwargs
     ) -> Dataset:
         """
         Read annotations from a specific format.
@@ -100,8 +100,10 @@ class Converter:
             Dataset object
         """
         if format_type not in self.readers:
-            raise ValueError(f"Unsupported format: {format_type}. "
-                           f"Supported formats: {list(self.readers.keys())}")
+            raise ValueError(
+                f"Unsupported format: {format_type}. "
+                f"Supported formats: {list(self.readers.keys())}"
+            )
 
         reader_class = self.readers[format_type]
 
@@ -109,18 +111,20 @@ class Converter:
             return reader_class.read(source_path)
 
         elif format_type == "yolo":
-            images_dir = kwargs.get('images_dir')
-            classes_file = kwargs.get('classes_file')
-            image_ext = kwargs.get('image_ext', '.jpg')
+            images_dir = kwargs.get("images_dir")
+            classes_file = kwargs.get("classes_file")
+            image_ext = kwargs.get("image_ext", ".jpg")
 
             if not images_dir or not classes_file:
-                raise ValueError("YOLO format requires 'images_dir' and 'classes_file' parameters")
+                raise ValueError(
+                    "YOLO format requires 'images_dir' and 'classes_file' parameters"
+                )
 
             return reader_class.read(
                 labels_dir=source_path,
                 images_dir=images_dir,
                 classes_file=classes_file,
-                image_ext=image_ext
+                image_ext=image_ext,
             )
 
         elif format_type == "voc":
@@ -133,7 +137,7 @@ class Converter:
         format_type: FormatType,
         dataset: Dataset,
         target_path: Union[str, Path],
-        **kwargs
+        **kwargs,
     ) -> None:
         """
         Write dataset to a specific format.
@@ -145,8 +149,10 @@ class Converter:
             **kwargs: Format-specific parameters
         """
         if format_type not in self.writers:
-            raise ValueError(f"Unsupported format: {format_type}. "
-                           f"Supported formats: {list(self.writers.keys())}")
+            raise ValueError(
+                f"Unsupported format: {format_type}. "
+                f"Supported formats: {list(self.writers.keys())}"
+            )
 
         writer_class = self.writers[format_type]
 
@@ -154,15 +160,15 @@ class Converter:
             writer_class.write(dataset, target_path)
 
         elif format_type == "yolo":
-            output_classes_file = kwargs.get('output_classes_file')
+            output_classes_file = kwargs.get("output_classes_file")
             if not output_classes_file:
                 # Default to classes.txt in same directory as labels
-                output_classes_file = Path(target_path).parent / 'classes.txt'
+                output_classes_file = Path(target_path).parent / "classes.txt"
 
             writer_class.write(
                 dataset,
                 output_labels_dir=target_path,
-                output_classes_file=output_classes_file
+                output_classes_file=output_classes_file,
             )
 
         elif format_type == "voc":

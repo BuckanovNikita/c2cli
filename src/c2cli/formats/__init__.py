@@ -5,7 +5,10 @@ from .yolo import YOLOReader, YOLOWriter
 from .pascal_voc import PascalVOCReader, PascalVOCWriter
 
 __all__ = [
-    "COCOReader", "COCOWriter",
-    "YOLOReader", "YOLOWriter",
-    "PascalVOCReader", "PascalVOCWriter",
+    "COCOReader",
+    "COCOWriter",
+    "YOLOReader",
+    "YOLOWriter",
+    "PascalVOCReader",
+    "PascalVOCWriter",
 ]

@@ -2,12 +2,12 @@
 
 from dataclasses import dataclass, field
 from typing import List, Optional, Dict, Any
-from pathlib import Path
 
 
 @dataclass
 class BBox:
     """Bounding box representation (x_min, y_min, x_max, y_max)."""
+
     x_min: float
     y_min: float
     x_max: float
@@ -19,10 +19,12 @@ class BBox:
             self.x_min,
             self.y_min,
             self.x_max - self.x_min,
-            self.y_max - self.y_min
+            self.y_max - self.y_min,
         )
 
-    def to_yolo(self, img_width: int, img_height: int) -> tuple[float, float, float, float]:
+    def to_yolo(
+        self, img_width: int, img_height: int
+    ) -> tuple[float, float, float, float]:
         """Convert to YOLO format (x_center, y_center, width, height) normalized."""
         width = self.x_max - self.x_min
         height = self.y_max - self.y_min
@@ -33,7 +35,7 @@ class BBox:
             x_center / img_width,
             y_center / img_height,
             width / img_width,
-            height / img_height
+            height / img_height,
         )
 
     @classmethod
@@ -42,8 +44,15 @@ class BBox:
         return cls(x, y, x + w, y + h)
 
     @classmethod
-    def from_yolo(cls, x_center: float, y_center: float, width: float, height: float,
-                  img_width: int, img_height: int) -> "BBox":
+    def from_yolo(
+        cls,
+        x_center: float,
+        y_center: float,
+        width: float,
+        height: float,
+        img_width: int,
+        img_height: int,
+    ) -> "BBox":
         """Create from YOLO format (normalized x_center, y_center, width, height)."""
         w = width * img_width
         h = height * img_height
@@ -55,6 +64,7 @@ class BBox:
 @dataclass
 class Annotation:
     """Single object annotation."""
+
     bbox: BBox
     category_id: int
     category_name: str
@@ -73,6 +83,7 @@ class Annotation:
 @dataclass
 class Image:
     """Image with annotations."""
+
     file_name: str
     width: int
     height: int
@@ -87,6 +98,7 @@ class Image:
 @dataclass
 class Category:
     """Category/class definition."""
+
     id: int
     name: str
     supercategory: Optional[str] = None
@@ -95,6 +107,7 @@ class Category:
 @dataclass
 class Dataset:
     """Complete dataset with images and categories."""
+
     images: List[Image] = field(default_factory=list)
     categories: List[Category] = field(default_factory=list)
     info: Dict[str, Any] = field(default_factory=dict)
