@@ -2,7 +2,7 @@
 
 import json
 from pathlib import Path
-from typing import Union
+from typing import Any, Union
 
 from ..models import Dataset, Image, Annotation, Category, BBox
 
@@ -89,7 +89,7 @@ class COCOWriter:
         output_path = Path(output_path)
         output_path.parent.mkdir(parents=True, exist_ok=True)
 
-        coco_data = {
+        coco_data: dict[str, Any] = {
             "info": dataset.info,
             "licenses": [],
             "categories": [],

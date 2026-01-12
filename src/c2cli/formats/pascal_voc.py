@@ -38,8 +38,9 @@ class PascalVOCReader:
             root = tree.getroot()
 
             for obj in root.findall("object"):
-                name = obj.find("name").text
-                categories_set.add(name)
+                name_elem = obj.find("name")
+                if name_elem is not None and name_elem.text is not None:
+                    categories_set.add(name_elem.text)
 
         # Create categories with IDs
         category_map = {}
@@ -54,32 +55,76 @@ class PascalVOCReader:
             root = tree.getroot()
 
             # Read image info
-            filename = root.find("filename").text
+            filename_elem = root.find("filename")
+            if filename_elem is None or filename_elem.text is None:
+                continue
+            filename = filename_elem.text
+
             size = root.find("size")
-            width = int(size.find("width").text)
-            height = int(size.find("height").text)
+            if size is None:
+                continue
+
+            width_elem = size.find("width")
+            height_elem = size.find("height")
+            if (
+                width_elem is None
+                or width_elem.text is None
+                or height_elem is None
+                or height_elem.text is None
+            ):
+                continue
+
+            width = int(width_elem.text)
+            height = int(height_elem.text)
 
             image = Image(file_name=filename, width=width, height=height)
 
             # Read objects/annotations
             for obj in root.findall("object"):
-                name = obj.find("name").text
+                name_elem = obj.find("name")
+                if name_elem is None or name_elem.text is None:
+                    continue
+                name = name_elem.text
+
+                difficult_elem = obj.find("difficult")
                 difficult = (
-                    int(obj.find("difficult").text)
-                    if obj.find("difficult") is not None
+                    int(difficult_elem.text)
+                    if difficult_elem is not None and difficult_elem.text is not None
                     else 0
                 )
+
+                truncated_elem = obj.find("truncated")
                 truncated = (
-                    int(obj.find("truncated").text)
-                    if obj.find("truncated") is not None
+                    int(truncated_elem.text)
+                    if truncated_elem is not None and truncated_elem.text is not None
                     else 0
                 )
 
                 bndbox = obj.find("bndbox")
-                xmin = float(bndbox.find("xmin").text)
-                ymin = float(bndbox.find("ymin").text)
-                xmax = float(bndbox.find("xmax").text)
-                ymax = float(bndbox.find("ymax").text)
+                if bndbox is None:
+                    continue
+
+                xmin_elem = bndbox.find("xmin")
+                ymin_elem = bndbox.find("ymin")
+                xmax_elem = bndbox.find("xmax")
+                ymax_elem = bndbox.find("ymax")
+
+                if (
+                    xmin_elem is None
+                    or xmin_elem.text is None
+                    or ymin_elem is None
+                    or ymin_elem.text is None
+                    or xmax_elem is None
+                    or xmax_elem.text is None
+                    or ymax_elem is None
+                    or ymax_elem.text is None
+                ):
+                    continue
+
+                xmin = float(xmin_elem.text)
+                ymin = float(ymin_elem.text)
+                xmax = float(xmax_elem.text)
+                ymax = float(ymax_elem.text)
 
                 bbox = BBox(xmin, ymin, xmax, ymax)
 
